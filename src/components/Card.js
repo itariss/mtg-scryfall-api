@@ -12,15 +12,16 @@ export default function CardDisplay() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    getNewCard(language);
-  }, [language]);
+    getNewCard();
+  }, []);
 
-  const getNewCard = (language) => {
+  const getNewCard = () => {
     setLoading(true);
     axios
       .get(`https://api.scryfall.com/cards/random?q=lang=${language}`)
       .then((response) => {
         setCard(response.data);
+        console.log(response.status);
         setLoading(false);
       })
       .catch((error) => {
@@ -28,10 +29,11 @@ export default function CardDisplay() {
       });
   };
 
-  const getCardById = (id) => {
+  const getCardById = (set, number, lang) => {
     setLoading(true);
+    console.log(`https://api.scryfall.com/cards/${set}/${number}/${lang}`);
     axios
-      .get(`https://api.scryfall.com/cards/${id}`)
+      .get(`https://api.scryfall.com/cards/${set}/${number}/${lang}`)
       .then((response) => {
         setCard(response.data);
         setLoading(false);
@@ -41,13 +43,14 @@ export default function CardDisplay() {
       });
   };
 
-  const handlerChange = (e, id) => {
-    setLanguage(e.target.value);
-    getCardById(id);
+  const handlerChange = (e) => {
+    const lang = e.target.value;
+    setLanguage(lang);
+    getCardById(card.set, card.collector_number, lang);
   };
 
   return (
-    <div>
+    <>
       {card ? (
         <Card
           title={card.printed_name ? card.printed_name : card.name}
@@ -67,16 +70,16 @@ export default function CardDisplay() {
           )}
         </Card>
       ) : (
-        <Spin></Spin>
+        <Spin size="large" spinning />
       )}
 
-      <Button type="primary" onClick={() => getNewCard(language)}>
+      <Button type="primary" size="large" onClick={() => getNewCard()}>
         Random Card
       </Button>
 
       <Radio.Group
         value={language}
-        onChange={(e) => handlerChange(e, card.id)}
+        onChange={(e) => handlerChange(e)}
         buttonStyle="solid"
         size="small"
       >
@@ -91,6 +94,6 @@ export default function CardDisplay() {
         <Radio.Button value="ru">ru</Radio.Button>
         <Radio.Button value="zh">zh</Radio.Button>
       </Radio.Group>
-    </div>
+    </>
   );
 }
